@@ -12,5 +12,24 @@
 */
 
 Route::get('/', function () {
+    return '<h2>hola carlos con LARAVEL</h2>';
+});
+
+
+Route::get('/welcome', function () {
     return view('welcome');
 });
+
+
+Route::get('/pruebas/{nombre?}', function ($nombre=null) {
+    $texto='<h2>texto de una ruta</h2>';
+    $texto .='Nombre: '.$nombre;
+    
+    return view('pruebas', array(
+        'texto'=>$texto
+    ));
+});
+
+
+Route::get('/animales', 'PruebasController@index');
+Route::get('/test-orm', 'PruebasController@testOrm');
