@@ -33,3 +33,13 @@ Route::get('/pruebas/{nombre?}', function ($nombre=null) {
 
 Route::get('/animales', 'PruebasController@index');
 Route::get('/test-orm', 'PruebasController@testOrm');
+
+//Rutas de API
+//son rutas de pruebas
+Route::get('/usuario/pruebas', 'UserController@pruebas');
+Route::get('/categoria/pruebas', 'CategoryController@pruebas');
+Route::get('/entrada/pruebas', 'PostController@pruebas');
+
+//rutas del controlador de usuarios
+Route::post('/api/register', 'UserController@register');
+Route::post('/api/login', 'UserController@login');
