@@ -16,9 +16,45 @@ $json=$request->input('json', null);
 $params=json_decode($json);
 $params_array=json_decode($json,true);
 
-var_dump($params_array);
-die();
+if(!empty($params)&& !empty($params_array)){
+    
+
+//limpiar los datos
+$params_array=array_map('trim',$params_array);
 //validar los datos
+$validate=\Validator::make($params_array,[
+    'name'=>'required|alpha',
+    'surname'=>'required|alpha',
+    'email'=>'required|email',
+    'password'=>'required'
+    
+]);
+
+if($validate->fails()){
+    
+       $data=array(
+            'status'=>'error',
+            'code'=>'404',
+            'message'=>'El usuario no se ha creado',
+           'errors'=>$validate->errors()
+        );
+    
+}else{
+     $data=array(
+            'status'=>'succes',
+            'code'=>'200',
+            'message'=>'El usuario se ha creado CORRECTAMENTE'
+           
+        );
+}
+}else{
+    $data=array(
+            'status'=>'error',
+            'code'=>'404',
+            'message'=>'Los datos enviados NO SON CORRECTOS'
+           
+        );
+}
 //cifrar la contraseña
 //comprobar que el usuario existe (duplicado)
 //crear el usuario
@@ -27,11 +63,7 @@ die();
 
 
 //devolver los datos con un json
-        $data=array(
-            'status'=>'error',
-            'code'=>'404',
-            'message'=>'El usuario no se ha creado'
-        );
+     
         return response()->json($data, $data['code']);
     }
     public function login(Request $request){
