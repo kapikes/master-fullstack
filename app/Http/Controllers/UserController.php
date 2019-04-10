@@ -11,7 +11,13 @@ class UserController extends Controller
     }
     //creamos dos metodos register y login
     public function register(Request $request){
-//recoger los datos del usuario por post
+//recoger los datos del usuario por post lo haremos con un json
+$json=$request->input('json', null);
+$params=json_decode($json);
+$params_array=json_decode($json,true);
+
+var_dump($params_array);
+die();
 //validar los datos
 //cifrar la contraseña
 //comprobar que el usuario existe (duplicado)
