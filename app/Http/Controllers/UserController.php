@@ -114,4 +114,17 @@ if($validate->fails()){
 
          return response()->json($signup,200);
     }
+    
+    public function update(Request $request){
+        $token=$request->header('Authorization');
+        $jwtAuth=new \JwtAuth();
+        $checkToken=$jwtAuth->checkToken($token);
+        
+        if($checkToken){
+            echo "<h1>LOGIN CORRECTO</h1>";
+        }else{
+            echo "<h1>LOGIN inCORRECTO</h1>";
+        }
+        die();
+    }
 }
