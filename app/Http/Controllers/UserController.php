@@ -79,6 +79,8 @@ $user->save();
         return response()->json($data, $data['code']);
     }
     public function login(Request $request){
-        return "Accion de login de usuario";
+        $jwtAuth=new \JwtAuth();
+         
+        return $jwtAuth->signup();
     }
 }
