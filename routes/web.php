@@ -10,6 +10,8 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+//Cargando Clases
+use App\Http\Middleware\ApiAuthMiddleware;
 
 Route::get('/', function () {
     return '<h2>hola carlos con LARAVEL</h2>';
@@ -44,3 +46,4 @@ Route::get('/entrada/pruebas', 'PostController@pruebas');
 Route::post('/api/register', 'UserController@register');
 Route::post('/api/login', 'UserController@login');
 Route::put('/api/user/update', 'UserController@update');
+Route::post('/api/user/upload', 'UserController@upload')->middleware(App\Http\Middleware\ApiAuthMiddleware::class);
