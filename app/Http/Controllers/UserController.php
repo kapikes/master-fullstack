@@ -203,7 +203,7 @@ if($validate->fails()){
         
         return response()->json($data, $data['code']);
     }
-    //metodo para sacar una imagen
+    //metodo para sacar una imagen (avatar)
     public function getImage($filename){
         //comprobar si un archivo existe
         $isset=\Storage::disk('users')->exist($filename);
@@ -219,5 +219,23 @@ if($validate->fails()){
             return response()->json($data, $data['code']);
         }
         
+    }
+    //metodo para sacar la informacion de un usuario...
+    public function detail($id){
+        $user=User::find($id);
+        if(is_object($user)){
+            $data=array(
+                'code'=>200,
+                'status'=>'succes',
+                'user'=>$user
+            );
+        }else{
+            $data=array(
+                'code'=>404,
+                'status'=>'error',
+                'message'=>'El usuario NO EXISTE'
+            );
+        }
+        return response()->json($data, $data['code']);
     }
 }
