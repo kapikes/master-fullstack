@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use App\User;
 
 class UserController extends Controller
@@ -201,5 +202,22 @@ if($validate->fails()){
         
         
         return response()->json($data, $data['code']);
+    }
+    //metodo para sacar una imagen
+    public function getImage($filename){
+        //comprobar si un archivo existe
+        $isset=\Storage::disk('users')->exist($filename);
+        if($isset){
+        $file=\Storage::disk('users')->get($filename);
+        return new Response($file, 200);    
+        }else{
+            $data=array(
+                'code'   =>404,
+                'status' =>'error',
+                'message'  =>'La imagen no existe'
+            );
+            return response()->json($data, $data['code']);
+        }
+        
     }
 }
