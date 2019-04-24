@@ -25,6 +25,7 @@ class CategoryController extends Controller {
 
 //metodo para mostrar una categoria en concreto
     public function show($id) {
+        $post=Post::find($id)->load('category');
         //saco de la bbdd el registro que necesito
         $category = Category::find($id);
         if (is_object($category)) {
