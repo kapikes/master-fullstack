@@ -84,6 +84,38 @@ class CategoryController extends Controller {
         return response()->json($data, $data['code']);
     }
 
+//Metodo para MODIFICAR/ACTUALIZAR  TODOS los datos    
+    public function update($id, Request $request) {
+        //Recoger los datos por post
+        $json = $request->input('json', null);
+        $params_array = json_decode($json, true);
+        if (!empty($params_array)) {
+
+
+            //Validar los datos
+            $validate = \Validator::make($params_array, [
+                        'name' => 'required'
+            ]);
+            //Quitar lo que no quiero actualizar
+            unset($params_array['id']);
+            unset($params_array['created_at']);
+
+            //Actualizar el registro (datos)
+            $category = Category::where('id', $id)->update($params_array);
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'category' => $params_array
+            ];
+        } else {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'No has enviado ninguna categoria'
+            ];
+        }
+        //Devolver respuesta
+        return response()->json($data, $data['code']);
     }
 
-
+}
