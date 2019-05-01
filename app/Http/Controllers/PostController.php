@@ -54,7 +54,7 @@ class PostController extends Controller {
         if (!empty($params_array)) {
             //Conseguir usuario identificado
             $jwtAuth = new JwtAuth();
-            $token = $request->header('Autorization', null);
+            $token = $request->header('Authorization', null);
             $user = $jwtAuth->checkToken($token, true);
 
             //Validar los datos
@@ -72,7 +72,7 @@ class PostController extends Controller {
                     'message' => 'No se ha guardado el post... FALTAN DATOS'
                 ];
             } else {
-//                //Guardar el articulo
+               //Guardar el articulo
                 $post = new Post();
                 $post->user_id = $user->sub;
                 $post->category_id = $params->category_id;
