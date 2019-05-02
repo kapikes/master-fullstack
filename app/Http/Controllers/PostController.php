@@ -14,6 +14,7 @@ class PostController extends Controller {
         $this->middleware('api.auth', ['except' => ['index', 'show']]);
     }
 
+//Metodo para listar todos los post que tenemos
     //Metodo en el que nos saca un listado de TODAS las entradas que necesitamos....
     public function index() {
         $post = Post::all()->load('category');
@@ -45,12 +46,13 @@ class PostController extends Controller {
         return response()->json($data, $data['code']);
     }
 
+//metodo para guardar un post
     public function store(Request $request) {
         //Recoger los datos por post
         $json = $request->input('json', null);
         $params = json_decode($json);
         $params_array = json_decode($json, true);
-        
+
         if (!empty($params_array)) {
             //Conseguir usuario identificado
             $jwtAuth = new JwtAuth();
@@ -72,7 +74,7 @@ class PostController extends Controller {
                     'message' => 'No se ha guardado el post... FALTAN DATOS'
                 ];
             } else {
-               //Guardar el articulo
+                //Guardar el articulo
                 $post = new Post();
                 $post->user_id = $user->sub;
                 $post->category_id = $params->category_id;
@@ -96,6 +98,49 @@ class PostController extends Controller {
             ];
         }
         //Devolver los resultados
+
+        return response()->json($data, $data['code']);
+    }
+
+    //Metodo para actualizar una entrada o post
+    public function update($id, Request $request) {
+        //Recoger los datos por post
+        $json = $request->input('json', null);
+        $params_array = json_decode($json, true);
+        //Datos para devolver
+        $data = array(
+            'code' => 400,
+            'status' => 'error',
+            'post' => 'Datos enviados incorrectos'
+        );
+        if(!empty($params_array)){
+            
+        
+        //Validar los datos
+        $validate = \Validator::make($params_array, [
+                    'title' => 'required',
+                    'content' => 'required',
+                    'category_id' => 'required'
+        ]);
+        if($validate->fails()){
+            $data['errors']=$validate->errors();
+            return response()->json($data, $data['code']);
+        }
+        //Eliminar lo que no queremos actualizar
+        unset($params_array['id']);
+        unset($params_array['user_id']);
+        unset($params_array['created_at']);
+        unset($params_array['user']);
+
+        //Actualizar el registro en concreto
+        $post = Post::Where('id', $id)->update($params_array);
+        //Devolver algo
+        $data = array(
+            'code' => 200,
+            'status' => 'success',
+            'post' => $params_array
+        );
+        }
 
         return response()->json($data, $data['code']);
     }
