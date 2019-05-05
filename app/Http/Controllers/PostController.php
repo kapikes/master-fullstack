@@ -11,7 +11,13 @@ class PostController extends Controller {
 
     //cargamos un constructor utilizamos lo protejemos por autentizacion menos en el index y show
     public function __construct() {
-        $this->middleware('api.auth', ['except' => ['index', 'show','getImage']]);
+        $this->middleware('api.auth', ['except' => [
+                'index',
+                'show',
+                'getImage',
+                'getPostsByCategory',
+                'getPostsByUser'
+        ]]);
     }
 
 //Metodo para listar todos los post que tenemos
@@ -205,55 +211,77 @@ class PostController extends Controller {
 
         return $user;
     }
+
     //Metodo para subir una imagen
-public function upload(Request $request){
-    //Recoger la imagen de la peticion
-    $image=$request->file('file0');
-    //Validar la imagen
-    $validate=\Validator::make($request->all(), [
-        'file0' =>'required|image|mimes:jpg,jpeg,png,gif'
+    public function upload(Request $request) {
+        //Recoger la imagen de la peticion
+        $image = $request->file('file0');
+        //Validar la imagen
+        $validate = \Validator::make($request->all(), [
+                    'file0' => 'required|image|mimes:jpg,jpeg,png,gif'
         ]);
-    //Guardar la imagen
-    if(!$image || $validate->fails()){
-        $data=[
-            'code' => 400,
-            'status' =>'error',
-            'message' =>'Error al subir la imagen'
-        ];
-    }else{
-        $image_name=time().$image->getClientOriginalname();
-        
-        \Storage::disk('images')->put($image_name, \File::get($image));
-        $data=[
-            'code' => 200,
-            'status' =>'success',
-            'image' =>$image_name
-        ];
+        //Guardar la imagen
+        if (!$image || $validate->fails()) {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Error al subir la imagen'
+            ];
+        } else {
+            $image_name = time() . $image->getClientOriginalname();
+
+            \Storage::disk('images')->put($image_name, \File::get($image));
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'image' => $image_name
+            ];
+        }
+        //Devolver datos
+        return response()->json($data, $data['code']);
     }
-    //Devolver datos
-    return response()->json($data, $data['code']);
-}
+
 //Metodo para conseguir una imagen
-public function getImage($filename){
-    //Comprobar si existe una imagen
-    $isset=\Storage::disk('images')->exists($filename);
-    if($isset){
-    //Conseguir la imagen
-        $file= \Storage::disk('images')->get($filename);
-        //Devolver la imagen
-        return new Response($file, 200);
-    }else{
-        $data=[
-            'code' => 404,
-            'status' =>'error',
-            'message' =>'La imagen NO EXISTE'
-        ];
+    public function getImage($filename) {
+        //Comprobar si existe una imagen
+        $isset = \Storage::disk('images')->exists($filename);
+        if ($isset) {
+            //Conseguir la imagen
+            $file = \Storage::disk('images')->get($filename);
+            //Devolver la imagen
+            return new Response($file, 200);
+        } else {
+            $data = [
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'La imagen NO EXISTE'
+            ];
+        }
+        return response()->json($data, $data['code']);
+
+
+
+
+        //Mostrar error
     }
-    return response()->json($data, $data['code']);
-    
-    
-    
-    
-    //Mostrar error
-}
+
+//Metodo para listar datos
+    public function getPostsByCategory($id) {
+        $posts = Post::where('category_id', $id)->get();
+
+        return response()->json([
+                    'status' => 'success',
+                    'post' => $posts
+                        ], 200);
+    }
+
+    public function getPostsByUser($id) {
+        $posts = Post::where('user_id', $id)->get();
+
+        return response()->json([
+                    'status' => 'success',
+                    'post' => $posts
+                        ], 200);
+    }
+
 }
