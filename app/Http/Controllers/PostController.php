@@ -113,33 +113,59 @@ class PostController extends Controller {
             'status' => 'error',
             'post' => 'Datos enviados incorrectos'
         );
-        if(!empty($params_array)){
-            
-        
-        //Validar los datos
-        $validate = \Validator::make($params_array, [
-                    'title' => 'required',
-                    'content' => 'required',
-                    'category_id' => 'required'
-        ]);
-        if($validate->fails()){
-            $data['errors']=$validate->errors();
-            return response()->json($data, $data['code']);
-        }
-        //Eliminar lo que no queremos actualizar
-        unset($params_array['id']);
-        unset($params_array['user_id']);
-        unset($params_array['created_at']);
-        unset($params_array['user']);
+        if (!empty($params_array)) {
 
-        //Actualizar el registro en concreto
-        $post = Post::Where('id', $id)->update($params_array);
-        //Devolver algo
-        $data = array(
-            'code' => 200,
-            'status' => 'success',
-            'post' => $params_array
-        );
+
+            //Validar los datos
+            $validate = \Validator::make($params_array, [
+                        'title' => 'required',
+                        'content' => 'required',
+                        'category_id' => 'required'
+            ]);
+            if ($validate->fails()) {
+                $data['errors'] = $validate->errors();
+                return response()->json($data, $data['code']);
+            }
+            //Eliminar lo que no queremos actualizar
+            unset($params_array['id']);
+            unset($params_array['user_id']);
+            unset($params_array['created_at']);
+            unset($params_array['user']);
+
+            //Actualizar el registro en concreto
+            $post = Post::Where('id', $id)->updateOrCreate($params_array);
+            //Devolver algo
+            $data = array(
+                'code' => 200,
+                'status' => 'success',
+                'post' => $post,
+                'changes' => $params_array
+            );
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    //Eliminar un post utilizando un metodo
+    public function destroy($id, Request $request) {
+        //Conseguir el registro
+        $post = Post::find($id);
+        //CREAMOS UN IF SI EXISTE EL POST O NO
+        if (!empty($post)) {
+            //Borrarlo
+            $post->delete();
+            //Devolver algo
+            $data = [
+                'code' => 200,
+                'status' => 'succes',
+                'post' => $post
+            ];
+        } else {
+            $data = [
+                'code' => 404,
+                'status' => 'error',
+                'post' => 'El post NO EXISTE'
+            ];
         }
 
         return response()->json($data, $data['code']);
