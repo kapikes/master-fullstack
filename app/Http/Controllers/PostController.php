@@ -11,7 +11,7 @@ class PostController extends Controller {
 
     //cargamos un constructor utilizamos lo protejemos por autentizacion menos en el index y show
     public function __construct() {
-        $this->middleware('api.auth', ['except' => ['index', 'show']]);
+        $this->middleware('api.auth', ['except' => ['index', 'show','getImage']]);
     }
 
 //Metodo para listar todos los post que tenemos
@@ -205,6 +205,7 @@ class PostController extends Controller {
 
         return $user;
     }
+    //Metodo para subir una imagen
 public function upload(Request $request){
     //Recoger la imagen de la peticion
     $image=$request->file('file0');
@@ -231,5 +232,28 @@ public function upload(Request $request){
     }
     //Devolver datos
     return response()->json($data, $data['code']);
+}
+//Metodo para conseguir una imagen
+public function getImage($filename){
+    //Comprobar si existe una imagen
+    $isset=\Storage::disk('images')->exists($filename);
+    if($isset){
+    //Conseguir la imagen
+        $file= \Storage::disk('images')->get($filename);
+        //Devolver la imagen
+        return new Response($file, 200);
+    }else{
+        $data=[
+            'code' => 404,
+            'status' =>'error',
+            'message' =>'La imagen NO EXISTE'
+        ];
+    }
+    return response()->json($data, $data['code']);
+    
+    
+    
+    
+    //Mostrar error
 }
 }
