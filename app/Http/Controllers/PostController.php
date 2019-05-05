@@ -55,9 +55,7 @@ class PostController extends Controller {
 
         if (!empty($params_array)) {
             //Conseguir usuario identificado
-            $jwtAuth = new JwtAuth();
-            $token = $request->header('Authorization', null);
-            $user = $jwtAuth->checkToken($token, true);
+            $user = $this->getIdentity($request);
 
             //Validar los datos
             $validate = \Validator::make($params_array, [
@@ -132,15 +130,33 @@ class PostController extends Controller {
             unset($params_array['created_at']);
             unset($params_array['user']);
 
-            //Actualizar el registro en concreto
-            $post = Post::Where('id', $id)->updateOrCreate($params_array);
-            //Devolver algo
-            $data = array(
-                'code' => 200,
-                'status' => 'success',
-                'post' => $post,
-                'changes' => $params_array
-            );
+//Conseguir el usuario identificado
+            $user = $this->getIdentity($request);
+
+            //Buscar el registro a actualizar    
+            $post = Post::where('id', $id)
+                    ->where('user_id', $user->sub)
+                    ->first();
+            if (!empty($post) && is_object($post)) {
+
+                //Actualizar el registro en concreto
+                $post->update($params_array);
+                //Devolver algo
+                $data = array(
+                    'code' => 200,
+                    'status' => 'success',
+                    'post' => $post,
+                    'changes' => $params_array
+                );
+            }
+            /*
+              $where= [
+              'id' => $id,
+              'user_id' => $user->sub
+              ];
+              $post = Post::updateOrCreate($where, $params_array);
+
+             */
         }
 
         return response()->json($data, $data['code']);
@@ -148,8 +164,18 @@ class PostController extends Controller {
 
     //Eliminar un post utilizando un metodo
     public function destroy($id, Request $request) {
+        //Conseguir usuario identificado
+        $jwtAuth = new JwtAuth();
+        $token = $request->header('Authorization', null);
+        $user = $jwtAuth->checkToken($token, true);
+
+        //Conseguir usuario identificado
+        //$user= $this->getIdentity($request);
         //Conseguir el registro
-        $post = Post::find($id);
+        $post = Post::where('id', $id)
+                ->where('user_id', $user->sub)
+                ->first();
+
         //CREAMOS UN IF SI EXISTE EL POST O NO
         if (!empty($post)) {
             //Borrarlo
@@ -171,4 +197,39 @@ class PostController extends Controller {
         return response()->json($data, $data['code']);
     }
 
+    private function getIdentity($request) {
+        //Conseguir usuario identificado
+        $jwtAuth = new JwtAuth();
+        $token = $request->header('Authorization', null);
+        $user = $jwtAuth->checkToken($token, true);
+
+        return $user;
+    }
+public function upload(Request $request){
+    //Recoger la imagen de la peticion
+    $image=$request->file('file0');
+    //Validar la imagen
+    $validate=\Validator::make($request->all(), [
+        'file0' =>'required|image|mimes:jpg,jpeg,png,gif'
+        ]);
+    //Guardar la imagen
+    if(!$image || $validate->fails()){
+        $data=[
+            'code' => 400,
+            'status' =>'error',
+            'message' =>'Error al subir la imagen'
+        ];
+    }else{
+        $image_name=time().$image->getClientOriginalname();
+        
+        \Storage::disk('images')->put($image_name, \File::get($image));
+        $data=[
+            'code' => 200,
+            'status' =>'success',
+            'image' =>$image_name
+        ];
+    }
+    //Devolver datos
+    return response()->json($data, $data['code']);
+}
 }
